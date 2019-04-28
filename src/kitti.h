@@ -19,6 +19,10 @@
 
 namespace salami {
 namespace kitti {
+struct PointsRings {
+    std::shared_ptr<Points> points;
+    std::vector<idx> rings;
+};
 class Loader {
    public:
     Loader(const std::string& folder, const idx dataset)
@@ -60,7 +64,7 @@ class Loader {
         }
     }
 
-    std::shared_ptr<Points> loadCloud(const idx frame) const {
+    PointsRings loadCloud(const idx frame) const {
         std::stringstream path_ss;
         path_ss << folder_ << "/" << std::setw(2) << std::setfill('0')
                 << dataset_ << "/velodyne/" << std::setw(6) << frame << ".bin";
@@ -99,21 +103,26 @@ class Loader {
                 return (idx)(a + b->cols());
             });
 
-        std::shared_ptr<Points> points = std::make_shared<Points>(3, good_n);
-        for (idx j = 0, k = 0; j < (idx)calibrated_points.size(); j++) {
-            const idx ring_n = calibrated_points[j]->cols();
-            points->block(0, k, 3, std::max(ring_n, idx(63))) =
-                *(calibrated_points[j]);
+        Points points(3, good_n);
+        PointsRings points_ring;
+        points_ring.rings.resize(good_n);
+        for (idx ring = 0, k = 0; ring < (idx)calibrated_points.size();
+             ring++) {
+            const idx ring_n = calibrated_points[ring]->cols();
+            points.block(0, k, 3, ring_n) = *(calibrated_points[ring]);
+            std::fill(points_ring.rings.begin() + k,
+                      points_ring.rings.begin() + k + ring_n, ring);
             k += ring_n;
         }
 
-        std::cerr << "Frame " << frame << ", read: " << points->cols()
-                  << " points" << std::endl;
-        *points = (*velodyne_extrinsic_) * (*points);
-        return points;
+        std::cerr << "Frame " << frame << ", read: " << points.cols()
+                  << " points with " << ring_id << " rings" << std::endl;
+        points_ring.points =
+            std::make_shared<Points>((*velodyne_extrinsic_) * points);
+        return points_ring;
     }
 
-    std::shared_ptr<Points> loadNextCloud() { return loadCloud(frame_++); }
+    PointsRings loadNextCloud() { return loadCloud(frame_++); }
 
     idx frameCount() const { return n_frames_; }
 

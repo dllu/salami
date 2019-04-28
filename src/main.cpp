@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     const idx n_frames = kitti_loader.frameCount();
     for (idx i = 0; i < n_frames; i++) {
         auto tic = std::chrono::steady_clock::now();
-        slam::Frame frame(kitti_loader.loadNextCloud());
+        slam::Frame frame(kitti_loader.loadNextCloud().points);
         (*frame.pose_) = delta;
         if (i == 1) {
             frame.pose_->translation()(2) = 1.0;

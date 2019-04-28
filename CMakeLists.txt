@@ -39,4 +39,4 @@ target_include_directories(
     kitti_eval PRIVATE
     ${PROJECT_SOURCE_DIR}/third-party/devkit/cpp/
     )
-set_property(TARGET kitti_eval PROPERTY COMPILE_FLAGS "-O3 -DNDEBUG -Wno-error")
+set_property(TARGET kitti_eval PROPERTY COMPILE_FLAGS "-O3 -DNDEBUG -Wno-error -Wno-all")
