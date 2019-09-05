@@ -22,4 +22,4 @@ cmake .. -DCMAKE_BUILD_TYPE="Release"
 make
 ```
 
-To run on dataset 0, `mkdir -p poses && ./salami /path/to/kitti/dataset/sequences 0`
+To run on dataset 0, `mkdir -p poses && ./salami /path/to/kitti/dataset/sequences ../range_offset.txt 0`

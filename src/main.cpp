@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
         */
 
         if (frames.size() > 0) {
-            salamiRegister(frame, frames, i == 1);
+            fineRegister(frame, frames, i == 1);
         }
         delta = *frame.pose_;
         pose = pose * delta;

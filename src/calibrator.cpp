@@ -77,10 +77,11 @@ class Calibrator {
 
 int main(int argc, char** argv) {
     if (argc != 6) {
-        std::cerr << "USAGE: salami_calibrator /path/to/kitti /path/to/poses "
-                     "/path/to/range_offset_input.txt "
-                     "/path/to/range_offset_output.txt 0"
-                  << std::endl;
+        std::cerr
+            << "USAGE: salami_calibrator /path/to/kitti /path/to/poses/00.txt "
+               "/path/to/range_offset_input.txt "
+               "/path/to/range_offset_output.txt 0"
+            << std::endl;
         return 1;
     }
 

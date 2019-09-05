@@ -29,8 +29,8 @@ struct Frame {
     std::unique_ptr<SE3> pose_;
 };
 
-inline void salamiRegister(Frame& frame, const std::deque<Frame>& history,
-                           bool coarse = false) {
+inline void fineRegister(Frame& frame, const std::deque<Frame>& history,
+                         bool coarse = false) {
     const idx n = frame.normals_->features_.size();
     // because the kitti dataset can start while the car is moving,
     // we want the first iteration of the very first registration to be
@@ -155,5 +155,12 @@ inline void salamiRegister(Frame& frame, const std::deque<Frame>& history,
         }
     }
 }
+
+inline SE3 coarseRegister(const Frame& frame,
+                          const std::deque<Frame>& history) {
+    std::cerr << "hi" << std::endl;
+    return SE3::Identity();
+}
+
 }  // namespace slam
 }  // namespace salami
