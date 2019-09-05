@@ -1,6 +1,7 @@
 #pragma once
 #include <deque>
 #include <memory>
+
 #include "geometry.h"
 #include "knn_search.h"
 #include "normals.h"

@@ -64,14 +64,16 @@ class GridSearch {
                         std::floor(point(0) * radius_inv_) + N / 2 + dy;
                     const idx z =
                         std::floor(point(2) * radius_inv_) + N / 2 + dz;
-                    if (z >= 0 && z < N && y >= 0 && y < N && x >= 0 && x < N) {
-                        if (grid_[y][z] && grid_[y][z]->at(x)) {
-                            for (idx i : *(grid_[y][z]->at(x))) {
-                                if ((points_->col(i) - point).squaredNorm() <=
-                                    radius_sq_) {
-                                    indices.push_back(i);
-                                }
-                            }
+                    if (z < 0 || z >= N || y < 0 || y >= N || x < 0 || x >= N) {
+                        continue;
+                    }
+                    if (!grid_[y][z] || !grid_[y][z]->at(x)) {
+                        continue;
+                    }
+                    for (idx i : *(grid_[y][z]->at(x))) {
+                        if ((points_->col(i) - point).squaredNorm() <=
+                            radius_sq_) {
+                            indices.push_back(i);
                         }
                     }
                 }

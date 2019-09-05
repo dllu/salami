@@ -4,12 +4,11 @@
  */
 
 #pragma once
-#include <cmath>
-#include <limits>
-
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <Eigen/SVD>
+#include <cmath>
+#include <limits>
 
 namespace salami {
 using flo = double;          // floating point type for math
@@ -87,7 +86,7 @@ inline SE3 exp(const se3& v) {
 
 void reorthogonalize(SE3& a) {
     Eigen::JacobiSVD<Mat3> svd(a.linear(),
-                               Eigen::ComputeThinU | Eigen::ComputeThinV);
+                               Eigen::ComputeFullU | Eigen::ComputeFullV);
     a.linear() = svd.matrixU() * svd.matrixV().transpose();
 }
 

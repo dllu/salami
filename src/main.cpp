@@ -10,13 +10,15 @@
 using namespace salami;
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        std::cerr << "USAGE: salami /path/to/kitti 0" << std::endl;
+    if (argc != 4) {
+        std::cerr << "USAGE: salami /path/to/kitti /path/to/range_offset.txt 0"
+                  << std::endl;
         return 1;
     }
     const std::string kitti_path = argv[1];
-    const idx kitti_dataset = std::atoi(argv[2]);
+    const idx kitti_dataset = std::atoi(argv[3]);
     kitti::Loader kitti_loader(kitti_path, kitti_dataset);
+    kitti_loader.range_offset_ = velodyne_calibration::loadRangeOffset(argv[2]);
 
     std::deque<slam::Frame> frames;
     SE3 pose = SE3::Identity();

@@ -23,6 +23,7 @@ struct PointsRings {
     std::shared_ptr<Points> points;
     std::vector<idx> rings;
 };
+
 class Loader {
    public:
     Loader(const std::string& folder, const idx dataset)
@@ -62,6 +63,8 @@ class Loader {
         while (std::getline(times_stream, times_string)) {
             n_frames_++;
         }
+
+        std::fill(range_offset_.begin(), range_offset_.end(), 0);
     }
 
     PointsRings loadCloud(const idx frame) const {
@@ -89,13 +92,13 @@ class Loader {
             points_ind++;
             if (p(0) > eps && last_p(0) > eps && p(1) >= 0 && last_p(1) < 0) {
                 calibrated_points.push_back(velodyne_calibration::calibrateRing(
-                    raw_points.leftCols(points_ind), ring_id++));
+                    raw_points.leftCols(points_ind), ring_id++, range_offset_));
                 points_ind = 0;
             }
             last_p = p;
         }
         calibrated_points.push_back(velodyne_calibration::calibrateRing(
-            raw_points.leftCols(points_ind), ring_id++));
+            raw_points.leftCols(points_ind), ring_id++, range_offset_));
 
         const idx good_n = std::accumulate(
             calibrated_points.begin(), calibrated_points.end(), idx(0),
@@ -125,6 +128,7 @@ class Loader {
     PointsRings loadNextCloud() { return loadCloud(frame_++); }
 
     idx frameCount() const { return n_frames_; }
+    velodyne_calibration::RangeOffset range_offset_;
 
    private:
     const std::string folder_;

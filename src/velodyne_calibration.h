@@ -4,9 +4,18 @@ namespace salami {
 namespace velodyne_calibration {
 constexpr flo min_range = 2.0;
 constexpr flo altitude_correction = 0.22 * M_PI / 180.0;
+using RangeOffset = std::array<flo, 64>;
+RangeOffset loadRangeOffset(const std::string& filename) {
+    std::ifstream range_offset_stream(filename);
+    RangeOffset range_offset;
+    for (idx i = 0; i < 64; i++) {
+        range_offset_stream >> range_offset[i];
+    }
+    return range_offset;
+}
 
 // vertical (z-axis) intercept of ray vs velodyne coordinate frame, meters
-constexpr std::array<double, 64> v_offset{
+constexpr std::array<flo, 64> v_offset{
     0.209141535130936, 0.208616367926389, 0.208276279650735, 0.207711958491218,
     0.207304518307663, 0.206773692939529, 0.206509890988135, 0.206049274521721,
     0.205544668001686, 0.205111174243929, 0.204769473906267, 0.204363854102242,
@@ -25,7 +34,7 @@ constexpr std::array<double, 64> v_offset{
     0.116882532786530, 0.116547107500328, 0.116246988271735, 0.116001603658080};
 
 // slope of ray coming from Velodyne lidar
-constexpr std::array<double, 64> v_slope{
+constexpr std::array<flo, 64> v_slope{
     0.03381401460753143,  0.02748061339687925,  0.02277538431755451,
     0.01521253417895640,  0.01010350224169016,  0.00315655045419278,
     -0.00155092151295872, -0.00789051608194701, -0.01401319335287942,
@@ -50,7 +59,8 @@ constexpr std::array<double, 64> v_slope{
     -0.46627535261180758};
 
 // range offset, meters
-constexpr std::array<double, 64> range_offset{
+/*
+constexpr std::array<flo, 64> range_offset{
     -4.0673e-02, -2.5500e-02, -3.6442e-02, -8.5331e-03, -4.4933e-02,
     2.8335e-02,  -6.1920e-02, -2.9808e-02, -1.6979e-02, -3.3833e-02,
     -5.0795e-02, -3.0273e-02, -5.4886e-02, -4.0219e-02, -1.7165e-02,
@@ -64,9 +74,11 @@ constexpr std::array<double, 64> range_offset{
     2.1203e-03,  3.1107e-03,  3.7737e-03,  -6.2003e-03, 6.1267e-03,
     1.6272e-03,  -8.6477e-03, -7.0274e-03, 8.2779e-04,  1.3744e-03,
     -3.5639e-03, -6.2852e-03, -5.7665e-03, -4.0192e-03};
+    */
 
 inline std::unique_ptr<Points> calibrateRing(const Eigen::Ref<Points>& input,
-                                             const idx ring_guess) {
+                                             const idx ring_guess,
+                                             const RangeOffset& range_offset) {
     const idx n = input.cols();
     if (n < 2) {
         return std::make_unique<Points>(3, 0);

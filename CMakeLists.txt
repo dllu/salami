@@ -27,6 +27,12 @@ add_executable(
 )
 set_property(TARGET salami PROPERTY CXX_STANDARD 14)
 
+add_executable(
+    salami_calibrator
+    src/calibrator.cpp
+)
+set_property(TARGET salami_calibrator PROPERTY CXX_STANDARD 14)
+
 ################################################################
 # kitti evaluation tool
 

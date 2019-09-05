@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen/SVD>
 #include <queue>
+
 #include "geometry.h"
 
 namespace salami {
@@ -15,9 +16,9 @@ struct NormalsInformation {
 template <idx K>
 inline std::unique_ptr<NormalsInformation> compute(const Points& points,
                                                    const idx n_samples = 200) {
-    const Eigen::Matrix<flo, -1, 3> points_t(points.transpose());
+    const Eigen::Matrix<flo, -1, 3> points_transposed(points.transpose());
     const nanoflann::KDTreeEigenMatrixAdaptor<const Eigen::Matrix<flo, -1, 3>>
-        kd(3, points_t);
+        kd(3, points_transposed);
 
     std::vector<std::priority_queue<std::pair<flo, idx>>> feature_responses(9);
     const idx n = points.cols();
