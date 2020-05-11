@@ -33,6 +33,8 @@ int main(int argc, char** argv) {
         auto tic = std::chrono::steady_clock::now();
         slam::Frame frame(kitti_loader.loadNextCloud().points);
         (*frame.pose_) = delta;
+        *frame.pose_global_ = pose * delta;
+
         if (i == 1) {
             frame.pose_->translation()(2) = 1.0;
         }
@@ -53,10 +55,11 @@ int main(int argc, char** argv) {
         }
         delta = *frame.pose_;
         pose = pose * delta;
+        *frame.pose_global_ = pose;
         if (i == 0 || delta.translation().squaredNorm() > 0.02) {
             frames.push_back(std::move(frame));
         }
-        while (frames.size() > 20) {
+        while (frames.size() > 5) {
             frames.pop_front();
         }
 

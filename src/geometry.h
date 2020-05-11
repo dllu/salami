@@ -84,7 +84,20 @@ inline SE3 exp(const se3& v) {
     return (SE3)result;
 }
 
-void reorthogonalize(SE3& a) {
+// retraction update
+inline SE3 expr(const se3& v) {
+    SE3 out;
+    const flo n = v.head<3>().norm();
+    if (n < num_eps) {
+        return exp(v);
+    }
+    Eigen::AngleAxis<double> aa(n, v.head<3>() / n);
+    out.linear() = aa.matrix();
+    out.translation() = v.tail<3>();
+    return out;
+}
+
+inline void reorthogonalize(SE3& a) {
     Eigen::JacobiSVD<Mat3> svd(a.linear(),
                                Eigen::ComputeFullU | Eigen::ComputeFullV);
     a.linear() = svd.matrixU() * svd.matrixV().transpose();

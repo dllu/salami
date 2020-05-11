@@ -21,32 +21,43 @@ struct Frame {
           normals_(normals::compute<60>(*points)),
           nn_fine_(fine_radius, points, normals_->valid_),
           nn_coarse_(coarse_radius, points, normals_->valid_),
-          pose_(std::make_unique<SE3>(SE3::Identity())) {}
+          pose_(std::make_unique<SE3>(SE3::Identity())),
+          pose_global_(std::make_unique<SE3>(SE3::Identity())) {}
     std::shared_ptr<Points> points_;
     std::unique_ptr<normals::NormalsInformation> normals_;
     search_t nn_fine_;
     search_t nn_coarse_;
     std::unique_ptr<SE3> pose_;
+    std::unique_ptr<SE3> pose_global_;
 };
 
 inline void fineRegister(Frame& frame, const std::deque<Frame>& history,
-                         bool coarse = false) {
+                         bool coarse = false, const flo gravity_mult = 0.1) {
     const idx n = frame.normals_->features_.size();
     // because the kitti dataset can start while the car is moving,
     // we want the first iteration of the very first registration to be
     // coarse. However, afterwards, coarse can cause it to snap to wrong
     // local minima and is very slow.
     flo lambda = 1e-4;
+    const SE3 world_pose = *frame.pose_global_ * frame.pose_->inverse();
     for (idx iteration = 0; iteration < 20; iteration++) {
         // const flo sigma = coarse ? 0.4 : 0.06;
         const flo sigma = coarse ? 0.4 : 0.06;
         const flo sigma_sq_inv = 1.0 / (sigma * sigma);
         // std::cerr << "Iteration: " << iteration << std::endl;
-        Eigen::Matrix<flo, -1, 6> jacobian(n, 6);
-        Eigen::Matrix<flo, -1, 1> residual(n, 1);
+        Eigen::Matrix<flo, -1, 6> jacobian(n + 3, 6);
+        Eigen::Matrix<flo, -1, 1> residual(n + 3, 1);
 
         jacobian.setZero();
         residual.setZero();
+
+        // slight y-axis regularization
+        residual.tail<3>() =
+            world_pose.linear() * frame.pose_->linear() * Vec3::UnitY() -
+            Vec3::UnitY();
+        jacobian.block<3, 3>(n, 0) =
+            -world_pose.linear() *
+            geometry::skewSym(Vec3(frame.pose_->linear() * Vec3::UnitY()));
 
         // std::ofstream fout("points.txt");
         const Points curr_points = (*frame.pose_) * (*frame.points_);
@@ -132,7 +143,7 @@ inline void fineRegister(Frame& frame, const std::deque<Frame>& history,
             break;
         }
         // std::cerr << "Update: " << update.transpose() << std::endl;
-        *frame.pose_ = geometry::exp(update) * (*frame.pose_);
+        *frame.pose_ = geometry::expr(update) * (*frame.pose_);
 
         /*
         SE3 update_SE3 = geometry::exp(update);
